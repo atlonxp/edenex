@@ -61,10 +61,6 @@ With **Log shader dumps** enabled in the GPU settings, the pipeline cache now wr
 - The custom-config launch action follows the package id (`${applicationId}.LAUNCH_WITH_CUSTOM_CONFIG`) so shortcuts keep working in every build variant.
 - The main activity declares a `PROCESS_TEXT` intent filter. Under Android 11+ package-visibility rules this lets overlay tools such as screen translators see the emulator without a broad `QUERY_ALL_PACKAGES` permission.
 
-### Reported upstream
-
-- Eden 0.2.1 ran Momotaro Dentetsu at 0 FPS because the HID Npad LIFO seeded empty entries from a shifted sampling number, so the game never accepted a controller state. Reported as [eden-emulator/Issue-Reports#671](https://github.com/eden-emulator/Issue-Reports/issues/671); upstream `master` already contains the fix, so this fork inherits it.
-
 ## Installing on Android
 
 1. Install the APK from the Releases page, or build it yourself (see below). Stock Eden can stay installed; the two apps use separate data folders under `Android/data/`.
@@ -85,10 +81,6 @@ cd src/android
 ```
 
 The APK ends up in `src/android/app/build/outputs/apk/mainline/`.
-
-## Contributing and upstreaming
-
-Bug reports and patches for this fork are welcome here. Please note that the Eden project does not accept contributions or reports produced with AI assistance, so anything you intend to send upstream has to follow their rules, not ours.
 
 ## License
 
