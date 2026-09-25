@@ -17,6 +17,7 @@
 #include "common/cityhash.h"
 #include "common/fs/fs.h"
 #include "common/fs/path_util.h"
+#include "shader_recompiler/frontend/ir/program.h"
 #include "common/thread_worker.h"
 #include "core/core.h"
 #include "shader_recompiler/backend/spirv/emit_spirv.h"
@@ -826,8 +827,18 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
             programs[index] = MergeDualVertexPrograms(program_va, program_vb, env);
         }
 
-        if (Settings::values.dump_guest_shaders) {
+        if (Settings::values.dump_guest_shaders || Settings::values.gpu_log_shader_dumps.GetValue()) {
             env.Dump(hash, key.unique_hashes[index]);
+            // Also dump the translated IR next to the guest binary (debugging aid).
+            const auto ir_dir{Common::FS::GetEdenPath(Common::FS::EdenPath::DumpDir) / "shaders_ir"};
+            if (Common::FS::CreateDirs(ir_dir)) {
+                const auto ir_path{ir_dir / fmt::format("{:016x}_{:016x}_s{}.ir", hash,
+                                                        key.unique_hashes[index], index)};
+                if (!Common::FS::Exists(ir_path)) {
+                    std::ofstream ir_file{ir_path};
+                    ir_file << Shader::IR::DumpProgram(programs[index]);
+                }
+            }
         }
 
         if (programs[index].info.requires_layer_emulation) {
