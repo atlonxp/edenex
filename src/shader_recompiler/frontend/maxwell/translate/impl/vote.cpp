@@ -46,8 +46,34 @@ void TranslatorVisitor::VOTE(u64 insn) {
     Vote(*this, insn);
 }
 
-void TranslatorVisitor::VOTE_vtg(u64) {
-    LOG_WARNING(Shader, "(STUBBED) called");
+void TranslatorVisitor::VOTE_vtg(u64 insn) {
+    // VOTE in vertex/tessellation/geometry stages. NVIDIA's driver emits it in the vertex
+    // epilogue that lets the hardware cull primitives entirely outside the frustum:
+    //   FSETP P0..P5 (clip tests), FSETP P6 (w > 0), VOTE.VTG.EQ P2, P6, EXIT FCSM_TR, AST pos
+    // Unlike VOTE, the low byte is not a ballot destination register: writing it clobbers the
+    // register holding the vertex z coordinate. Only the destination predicate is produced, with
+    // single-lane semantics; the culling itself is decided by the FCSM_TR flow test, which the
+    // translator resolves to "never cull" (the host GPU clips anyway).
+    union {
+        u64 raw;
+        BitField<39, 3, IR::Pred> pred_a;
+        BitField<42, 1, u64> neg_pred_a;
+        BitField<45, 3, IR::Pred> pred_b;
+        BitField<48, 2, VoteOp> vote_op;
+    } const vote{insn};
+    const IR::U1 vote_pred{ir.GetPred(vote.pred_a, vote.neg_pred_a != 0)};
+    switch (vote.vote_op) {
+    case VoteOp::ALL:
+    case VoteOp::ANY:
+        ir.SetPred(vote.pred_b, vote_pred);
+        break;
+    case VoteOp::EQ:
+        ir.SetPred(vote.pred_b, ir.Imm1(true));
+        break;
+    default:
+        throw NotImplementedException("Invalid VOTE_vtg op {}", vote.vote_op);
+    }
+    env.vtg_cull_epilogue = true;
 }
 
 } // namespace Shader::Maxwell

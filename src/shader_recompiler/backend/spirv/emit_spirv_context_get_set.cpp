@@ -587,13 +587,16 @@ Id EmitIsHelperInvocation(EmitContext& ctx) {
 }
 
 Id EmitSR_WScaleFactorXY(EmitContext& ctx) {
-    LOG_WARNING(Shader, "(STUBBED) called");
-    return ctx.Const(0x00ff0000u);
+    // Viewport W-scaling (NV_clip_space_w_scaling) is never enabled by the emulated driver; a
+    // non-zero placeholder made driver-generated vertex epilogues apply bogus W-scaling once
+    // VOTE_vtg started working (Momotaro Dentetsu: geometry sinking behind terrain).
+    // The driver-generated vertex epilogue multiplies these by w to build its frustum
+    // outcode tests, so the disabled state is a scale factor of 1.0.
+    return ctx.Const(0x3f800000u);
 }
 
 Id EmitSR_WScaleFactorZ(EmitContext& ctx) {
-    LOG_WARNING(Shader, "(STUBBED) called");
-    return ctx.Const(0x00ff0000u);
+    return ctx.Const(0x3f800000u);
 }
 
 Id EmitYDirection(EmitContext& ctx) {

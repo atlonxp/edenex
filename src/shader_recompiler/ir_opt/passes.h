@@ -28,6 +28,7 @@ void TexturePass(Environment& env, IR::Program& program, const HostTranslateInfo
 void LayerPass(IR::Program& program, const HostTranslateInfo& host_info);
 void VendorWorkaroundPass(IR::Program& program);
 void VerificationPass(const IR::Program& program);
+void VtgCullPass(Environment& env, IR::Program& program);
 
 // Dual Vertex
 void VertexATransformPass(IR::Program& program);

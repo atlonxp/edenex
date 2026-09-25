@@ -236,6 +236,7 @@ void LowerGeometryPassthrough(const IR::Program& program, const HostTranslateInf
 
 IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Block>& block_pool,
                              Environment& env, Flow::CFG& cfg, const HostTranslateInfo& host_info) {
+    env.vtg_cull_epilogue = false;
     HostTranslateInfo normalized_host_info{host_info};
     normalized_host_info.ApplyDescriptorLimitPolicy();
 
@@ -297,6 +298,7 @@ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Blo
     Optimization::ConstantPropagationPass(env, program);
 
     Optimization::PositionPass(env, program);
+    Optimization::VtgCullPass(env, program);
 
     Optimization::GlobalMemoryToStorageBufferPass(program, normalized_host_info);
     Optimization::TexturePass(env, program, normalized_host_info);

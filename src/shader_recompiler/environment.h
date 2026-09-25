@@ -72,6 +72,10 @@ class Environment {
 public:
     virtual ~Environment() = default;
 
+    /// Set by the translator when the program contains the driver-generated VTG cull epilogue
+    /// (VOTE.VTG + EXIT FCSM_TR); position stores then emulate the hardware primitive cull.
+    bool vtg_cull_epilogue{false};
+
     [[nodiscard]] virtual u64 ReadInstruction(u32 address) = 0;
 
     [[nodiscard]] virtual u32 ReadCbufValue(u32 cbuf_index, u32 cbuf_offset) = 0;
