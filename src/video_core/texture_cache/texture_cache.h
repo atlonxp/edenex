@@ -1656,6 +1656,29 @@ ImageId TextureCache<P>::JoinImages(const ImageInfo& info, GPUVAddr gpu_addr, DA
         DeleteImage(overlap_id);
     }
 
+    // Skip the guest-memory upload when a GPU-modified overlap fully covers the new image: the
+    // copy below overwrites everything the upload would have produced. Render targets that are
+    // recreated every frame as MSAA <-> raw-layout aliases (e.g. Momotaro Dentetsu's 2x MSAA HDR
+    // scene buffer) otherwise cost a full CPU unswizzle of the whole surface per recreation.
+    bool covered_by_gpu_copy = false;
+    for (const auto& copy_object : join_copies_to_do) {
+        if (copy_object.is_alias) {
+            continue;
+        }
+        const Image& overlap = slot_images[copy_object.id];
+        if (True(overlap.flags & ImageFlagBits::GpuModified) &&
+            False(overlap.flags & ImageFlagBits::CpuModified) &&
+            overlap.gpu_addr == new_image.gpu_addr &&
+            overlap.guest_size_bytes >= new_image.guest_size_bytes &&
+            overlap.info.resources.levels == 1 && new_info.resources.levels == 1) {
+            covered_by_gpu_copy = true;
+            break;
+        }
+    }
+    if (covered_by_gpu_copy) {
+        new_image.flags &= ~ImageFlagBits::CpuModified;
+        TrackImage(new_image, new_image_id);
+    }
     // TODO: Only upload what we need
     RefreshContents(new_image, new_image_id);
 
