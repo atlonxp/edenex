@@ -6,6 +6,7 @@
 
 package org.yuzu.yuzu_emu.utils
 
+import org.yuzu.yuzu_emu.BuildConfig
 import android.content.Context
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 
 object CustomSettingsHandler {
-    const val CUSTOM_CONFIG_ACTION = "dev.eden.eden_emulator.LAUNCH_WITH_CUSTOM_CONFIG"
+    val CUSTOM_CONFIG_ACTION = BuildConfig.APPLICATION_ID + ".LAUNCH_WITH_CUSTOM_CONFIG"
     const val EXTRA_TITLE_ID = "title_id"
     const val EXTRA_CUSTOM_SETTINGS = "custom_settings"
 

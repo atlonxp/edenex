@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Eden Extended, option 1: sprout breaking the frame</title>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="52%" r="60%">
+      <stop offset="0" stop-color="#173A31"/>
+      <stop offset="1" stop-color="#0D1B18"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3FBF7F"/>
+      <stop offset="1" stop-color="#B6FFD8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <!-- enclosure: ring centred on the canvas (512,512), r 300, opening at the top -->
+  <path d="M 606 227 A 300 300 0 1 1 418 227" fill="none" stroke="#EAD7B0" stroke-width="46" stroke-linecap="round"/>
+  <!-- stem: rises from inside the ring and crosses above it -->
+  <path d="M 512 722 C 512 582 500 482 526 392 C 548 316 566 252 560 148" fill="none" stroke="url(#leaf)" stroke-width="46" stroke-linecap="round"/>
+  <!-- left leaf -->
+  <path d="M 512 522 C 400 512 340 442 352 352 C 446 358 508 416 512 522 Z" fill="url(#leaf)"/>
+  <!-- right leaf, higher, reaching outward over the ring -->
+  <path d="M 540 346 C 652 334 716 252 704 162 C 610 172 546 236 540 346 Z" fill="url(#leaf)"/>
+</svg>
