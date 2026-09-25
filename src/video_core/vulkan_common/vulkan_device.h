@@ -58,6 +58,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
     FEATURE(EXT, CustomBorderColor, CUSTOM_BORDER_COLOR, custom_border_color)                      \
     FEATURE(EXT, DepthBiasControl, DEPTH_BIAS_CONTROL, depth_bias_control)                         \
     FEATURE(EXT, DepthClipControl, DEPTH_CLIP_CONTROL, depth_clip_control)                         \
+    FEATURE(EXT, ImageCompressionControl, IMAGE_COMPRESSION_CONTROL, image_compression_control)    \
     FEATURE(EXT, DescriptorBuffer, DESCRIPTOR_BUFFER, descriptor_buffer)                           \
     FEATURE(EXT, ExtendedDynamicState, EXTENDED_DYNAMIC_STATE, extended_dynamic_state)             \
     FEATURE(EXT, ExtendedDynamicState2, EXTENDED_DYNAMIC_STATE_2, extended_dynamic_state2)         \
@@ -130,6 +131,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
     EXTENSION_NAME(VK_EXT_CONSERVATIVE_RASTERIZATION_EXTENSION_NAME)                               \
     EXTENSION_NAME(VK_EXT_DEPTH_BIAS_CONTROL_EXTENSION_NAME)                                       \
     EXTENSION_NAME(VK_EXT_DEPTH_RANGE_UNRESTRICTED_EXTENSION_NAME)                                 \
+    EXTENSION_NAME(VK_EXT_IMAGE_COMPRESSION_CONTROL_EXTENSION_NAME)                                \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME)                                   \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_2_EXTENSION_NAME)                                 \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME)                                 \
@@ -182,6 +184,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
     FEATURE_NAME(depth_bias_control, depthBiasControl)                                             \
     FEATURE_NAME(depth_bias_control, leastRepresentableValueForceUnormRepresentation)              \
     FEATURE_NAME(depth_bias_control, depthBiasExact)                                               \
+    FEATURE_NAME(image_compression_control, imageCompressionControl)                               \
     FEATURE_NAME(descriptor_indexing, descriptorBindingPartiallyBound)                             \
     FEATURE_NAME(descriptor_indexing, shaderSampledImageArrayNonUniformIndexing)                   \
     FEATURE_NAME(extended_dynamic_state, extendedDynamicState)                                     \
@@ -676,6 +679,22 @@ FN_MAX_LIMIT_LIST
     /// Returns true if the device supports VK_EXT_depth_bias_control.
     bool IsExtDepthBiasControlSupported() const {
         return extensions.depth_bias_control;
+    }
+
+    /// Returns true if the device supports VK_EXT_image_compression_control.
+    bool IsExtImageCompressionControlSupported() const {
+        return extensions.image_compression_control;
+    }
+
+    /// Adreno (Turnip and proprietary) hangs on UBWC-compressed multisampled render targets in
+    /// some games (Momotaro Dentetsu); disable compression for those images when possible.
+    bool ShouldDisableMsaaImageCompression() const {
+        if (!IsExtImageCompressionControlSupported()) {
+            return false;
+        }
+        const auto driver_id = GetDriverID();
+        return driver_id == VK_DRIVER_ID_MESA_TURNIP ||
+               driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY;
     }
 
     /// Returns true if the device supports VK_EXT_shader_viewport_index_layer.

@@ -245,6 +245,18 @@ constexpr VkBorderColor ConvertBorderColor(const std::array<float, 4>& color) {
             image_ci.pNext = &image_format_list;
         }
     }
+    // Adreno drivers hang on UBWC-compressed multisampled targets in some games; opt the MSAA
+    // images out of compression, keeping every other image compressed for performance.
+    VkImageCompressionControlEXT compression_control{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_CONTROL_EXT,
+        .pNext = image_ci.pNext,
+        .flags = VK_IMAGE_COMPRESSION_DISABLED_EXT,
+        .compressionControlPlaneCount = 0,
+        .pFixedRateFlags = nullptr,
+    };
+    if (info.num_samples > 1 && device.ShouldDisableMsaaImageCompression()) {
+        image_ci.pNext = &compression_control;
+    }
     return allocator.CreateImage(image_ci);
 }
 
@@ -1277,7 +1289,10 @@ void TextureCacheRuntime::BlitImage(Framebuffer* dst_framebuffer, ImageView& dst
                                     operation);
         return;
     }
-    ASSERT(src.format == dst.format);
+    // Colour MSAA resolves with a format change are handled by BlitColorMSAA below.
+    const bool is_color_resolve_convert =
+        is_src_msaa && !is_dst_msaa && aspect_mask == VK_IMAGE_ASPECT_COLOR_BIT;
+    ASSERT(is_color_resolve_convert || src.format == dst.format);
     if (is_src_msaa && !is_dst_msaa &&
         (aspect_mask & (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT)) != 0) {
         if ((aspect_mask & VK_IMAGE_ASPECT_DEPTH_BIT) == 0) {
